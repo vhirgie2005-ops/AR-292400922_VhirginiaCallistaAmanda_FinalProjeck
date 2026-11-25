@@ -1,3 +1,4 @@
+
 using UnityEngine;
 
 public class ARObjectController : MonoBehaviour
@@ -27,9 +28,20 @@ public class ARObjectController : MonoBehaviour
         if (targetObject != null) return;
 
         GameObject found = GameObject.FindGameObjectWithTag(targetTag);
+
         if (found != null)
         {
-            targetObject = found.transform;
+            Transform pivot = found.transform.Find("ModelPivot");
+
+            if (pivot != null)
+            {
+                targetObject = pivot;
+                Debug.Log("ModelPivot berhasil ditemukan!");
+            }
+            else
+            {
+                Debug.LogWarning("ModelPivot tidak ditemukan pada objek AR!");
+            }
         }
     }
 
@@ -42,7 +54,10 @@ public class ARObjectController : MonoBehaviour
 
         if (targetObject == null)
         {
-            Debug.LogWarning("Target AR belum ditemukan. Scan marker terlebih dahulu.");
+            Debug.LogWarning(
+                "Target AR belum ditemukan. Scan marker terlebih dahulu."
+            );
+
             return false;
         }
 
@@ -52,37 +67,61 @@ public class ARObjectController : MonoBehaviour
     public void RotateLeft()
     {
         if (!TargetReady()) return;
-        targetObject.Rotate(0f, rotateStep, 0f, Space.Self);
+
+        targetObject.Rotate(0f, -rotateStep, 0f, Space.Self);
+
+        Debug.Log("Objek AR berputar ke kiri!");
+
         PlayFeedback();
     }
 
     public void RotateRight()
     {
         if (!TargetReady()) return;
-        targetObject.Rotate(0f, -rotateStep, 0f, Space.Self);
+
+        targetObject.Rotate(0f, rotateStep, 0f, Space.Self);
+
+        Debug.Log("Objek AR berputar ke kanan!");
+
         PlayFeedback();
     }
 
     public void ScaleUp()
     {
         if (!TargetReady()) return;
+
         ApplyScale(scaleFactor);
+
+        Debug.Log("Ukuran objek AR diperbesar!");
+
         PlayFeedback();
     }
 
     public void ScaleDown()
     {
         if (!TargetReady()) return;
+
         ApplyScale(1f / scaleFactor);
+
+        Debug.Log("Ukuran objek AR diperkecil!");
+
         PlayFeedback();
     }
 
     private void ApplyScale(float factor)
     {
         Vector3 current = targetObject.localScale;
+
         float currentX = Mathf.Max(current.x, 0.0001f);
-        float desiredX = Mathf.Clamp(currentX * factor, minScale, maxScale);
+
+        float desiredX = Mathf.Clamp(
+            currentX * factor,
+            minScale,
+            maxScale
+        );
+
         float ratio = desiredX / currentX;
+
         targetObject.localScale = current * ratio;
     }
 
